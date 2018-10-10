@@ -12,4 +12,9 @@
 
     <string name="intro_4">Tudo organizado no \n celular ou computador</string>
     <string name="intro_4_sub">Use no seu smartphone e acessando o \n Organizze pelo site</string>
+
+    <string name="intro_cadastro_title_1">Crie sua conta grátis</string>
+    <string name="intro_cadastro_title_2">Junte-se a mais de meio milhão \n de pessoas e comece já</string>
+    <string name="intro_cadastro_title_3">Já tenho conta</string>
+    <string name="intro_cadastro_btn_cadastrar">Cadastre-se</string>
 </resources>
