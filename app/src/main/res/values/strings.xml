@@ -17,4 +17,12 @@
     <string name="intro_cadastro_title_2">Junte-se a mais de meio milhão \n de pessoas e comece já</string>
     <string name="intro_cadastro_title_3">Já tenho conta</string>
     <string name="intro_cadastro_btn_cadastrar">Cadastre-se</string>
+
+    <string name="cadastro_title_1">Crie sua conta grátis</string>
+    <string name="cadastro_btn">Cadastrar</string>
+    <string name="cadastro_title_2">Termos de uso</string>
+
+
+    <string name="login_title_1">Acesse sua conta</string>
+    <string name="login_btn">Entrar</string>
 </resources>
