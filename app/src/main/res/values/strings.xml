@@ -25,4 +25,5 @@
 
     <string name="login_title_1">Acesse sua conta</string>
     <string name="login_btn">Entrar</string>
+    <string name="title_activity_principal">PrincipalActivity</string>
 </resources>

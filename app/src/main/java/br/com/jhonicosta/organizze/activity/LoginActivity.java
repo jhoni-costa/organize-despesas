@@ -1,5 +1,6 @@
 package br.com.jhonicosta.organizze.activity;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -67,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, "Sucesso ao fazer login", Toast.LENGTH_SHORT).show();
+                    abrirTelaPrincipal();
                 } else {
                     String exception = "";
                     try {
@@ -84,5 +85,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void abrirTelaPrincipal() {
+        startActivity(new Intent(this, PrincipalActivity.class));
+        finish();
     }
 }
