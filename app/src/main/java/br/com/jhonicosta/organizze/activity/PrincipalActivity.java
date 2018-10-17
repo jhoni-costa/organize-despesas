@@ -1,5 +1,6 @@
 package br.com.jhonicosta.organizze.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -21,11 +22,11 @@ public class PrincipalActivity extends AppCompatActivity {
     }
 
     public void addReceita(View view) {
-
+        startActivity(new Intent(this, ReceitasActivity.class));
     }
 
     public void addDespesa(View view) {
-
+        startActivity(new Intent(this, DespesasActivity.class));
     }
 
 }
