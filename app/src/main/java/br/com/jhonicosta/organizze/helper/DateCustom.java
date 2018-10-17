@@ -10,4 +10,9 @@ public class DateCustom {
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         return format.format(date);
     }
+
+    public static String dataFirebase(String data){
+        String[] split = data.split("/");
+        return split[1]+split[2];
+    }
 }
