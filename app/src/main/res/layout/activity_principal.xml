@@ -51,6 +51,7 @@
             fab:fab_colorNormal="@color/colorPrimaryReceita"
             fab:fab_label="Receita"
             fab:fab_size="mini" />
+
     </com.github.clans.fab.FloatingActionMenu>
 
 </android.support.design.widget.CoordinatorLayout>

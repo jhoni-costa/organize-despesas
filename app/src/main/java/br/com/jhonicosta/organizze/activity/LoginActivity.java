@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (!txtEmail.isEmpty()) {
                     if (!txtSenha.isEmpty()) {
-                        usuario = new Usuario(null, txtEmail, txtSenha);
+                        usuario = new Usuario(null,null, txtEmail, txtSenha);
                         validarLogin();
                     } else {
                         Toast.makeText(LoginActivity.this, "Preencha a senha!", Toast.LENGTH_SHORT).show();

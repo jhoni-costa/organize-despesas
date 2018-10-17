@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 import br.com.jhonicosta.organizze.R;
 import br.com.jhonicosta.organizze.config.ConfigFirebase;
+import br.com.jhonicosta.organizze.helper.Base64Custom;
 import br.com.jhonicosta.organizze.model.Usuario;
 
 public class CadastroActivity extends AppCompatActivity {
@@ -49,7 +50,7 @@ public class CadastroActivity extends AppCompatActivity {
                 if (!txtNome.isEmpty()) {
                     if (!txtEmail.isEmpty()) {
                         if (!txtSenha.isEmpty()) {
-                            usuario = new Usuario(txtNome, txtEmail, txtSenha);
+                            usuario = new Usuario(Base64Custom.encode64(txtEmail), txtNome, txtEmail, txtSenha);
                             cadastrarUsuario();
                         } else {
                             Toast.makeText(CadastroActivity.this, "Preencha a senha!", Toast.LENGTH_SHORT).show();
@@ -75,6 +76,7 @@ public class CadastroActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+                    usuario.salvar();
                     finish();
                 } else {
                     String exception = "";

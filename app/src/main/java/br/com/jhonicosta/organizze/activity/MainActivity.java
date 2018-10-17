@@ -50,7 +50,6 @@ public class MainActivity extends IntroActivity {
                 .canGoForward(false)
                 .build());
 
-
     }
 
     @Override
@@ -69,6 +68,7 @@ public class MainActivity extends IntroActivity {
 
     public void verificarUsuarioLogado() {
         auth = ConfigFirebase.getFirebaseAuth();
+       // auth.signOut();
         if (auth.getCurrentUser() != null) {
             abrirTelaPrincipal();
         }
