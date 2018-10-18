@@ -2,6 +2,7 @@ package br.com.jhonicosta.organizze.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -11,19 +12,33 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 
+import java.text.DecimalFormat;
+
 import br.com.jhonicosta.organizze.R;
 import br.com.jhonicosta.organizze.config.ConfigFirebase;
+import br.com.jhonicosta.organizze.helper.Base64Custom;
+import br.com.jhonicosta.organizze.model.Usuario;
 
 public class PrincipalActivity extends AppCompatActivity {
 
     private MaterialCalendarView calendarView;
     private TextView txtSaldacao, txtSaldo;
-    private FirebaseAuth auth = ConfigFirebase.getFirebaseAuth();
 
+    private Double despesaTotal = 0.00;
+    private Double receitaTotal = 0.00;
+    private Double resumo = 0.00;
+
+
+    private FirebaseAuth auth = ConfigFirebase.getFirebaseAuth();
+    private DatabaseReference reference = ConfigFirebase.getFirebaseDatabase();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +53,33 @@ public class PrincipalActivity extends AppCompatActivity {
         txtSaldo = findViewById(R.id.txtSaldoPrincipal);
 
         configCalendarView();
+        recuperarResumo();
+    }
 
+    public void recuperarResumo() {
+        String emailUser = auth.getCurrentUser().getEmail();
+        DatabaseReference usuarioRef = reference.child("usuarios")
+                .child(Base64Custom.encode64(emailUser));
+
+        usuarioRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Usuario usuario = dataSnapshot.getValue(Usuario.class);
+                despesaTotal = usuario.getDespesaTotal();
+                receitaTotal = usuario.getReceitaTotal();
+                resumo = receitaTotal - despesaTotal;
+
+                DecimalFormat dc = new DecimalFormat("0.##");
+
+                txtSaldacao.setText("Olá, " + usuario.getNome());
+                txtSaldo.setText("R$: " + dc.format(resumo));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
