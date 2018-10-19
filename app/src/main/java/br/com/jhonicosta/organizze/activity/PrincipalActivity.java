@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,19 +35,22 @@ import br.com.jhonicosta.organizze.model.Usuario;
 public class PrincipalActivity extends AppCompatActivity {
 
     private MaterialCalendarView calendarView;
-    private TextView txtSaldacao, txtSaldo;
-    private RecyclerView recyclerView;
-
+    private TextView textoSaudacao, textoSaldo;
     private Double despesaTotal = 0.00;
     private Double receitaTotal = 0.00;
-    private Double resumo = 0.00;
+    private Double resumoUsuario = 0.00;
 
-    private FirebaseAuth auth = ConfigFirebase.getFirebaseAuth();
-    private DatabaseReference reference = ConfigFirebase.getFirebaseDatabase();
+    private FirebaseAuth autenticacao = ConfigFirebase.getFirebaseAuth();
+    private DatabaseReference firebaseRef = ConfigFirebase.getFirebaseDatabase();
     private DatabaseReference usuarioRef;
-    private ValueEventListener vELUsuario;
-    private AdapterMovimentacao adapterMov;
+    private ValueEventListener valueEventListenerUsuario;
+    private ValueEventListener valueEventListenerMovimentacoes;
+
+    private RecyclerView recyclerView;
+    private AdapterMovimentacao adapterMovimentacao;
     private List<Movimentacao> movimentacoes = new ArrayList<>();
+    private DatabaseReference movimentacaoRef;
+    private String mesAnoSelecionado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,45 +60,69 @@ public class PrincipalActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
 
+        textoSaldo = findViewById(R.id.txtSaldoPrincipal);
+        textoSaudacao = findViewById(R.id.txtSaudacao);
         calendarView = findViewById(R.id.calendarView);
-        txtSaldacao = findViewById(R.id.txtSaudacao);
-        txtSaldo = findViewById(R.id.txtSaldoPrincipal);
         recyclerView = findViewById(R.id.rvMovimentos);
+        configuraCalendarView();
 
-        configCalendarView();
-
-        adapterMov = new AdapterMovimentacao(movimentacoes, getApplicationContext());
+        adapterMovimentacao = new AdapterMovimentacao(movimentacoes, this);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(adapterMov);
+        recyclerView.setAdapter(adapterMovimentacao);
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        recuperarResumo();
+    public void recuperarMovimentacoes() {
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.encode64(emailUsuario);
+        movimentacaoRef = firebaseRef.child("movimentacao")
+                .child(idUsuario)
+                .child(mesAnoSelecionado);
+
+        valueEventListenerMovimentacoes = movimentacaoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                movimentacoes.clear();
+
+                for (DataSnapshot dados : dataSnapshot.getChildren()) {
+                    Movimentacao movimentacao = dados.getValue(Movimentacao.class);
+                    movimentacoes.add(movimentacao);
+                }
+
+                adapterMovimentacao.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void recuperarResumo() {
-        String emailUser = auth.getCurrentUser().getEmail();
-        usuarioRef = reference.child("usuarios")
-                .child(Base64Custom.encode64(emailUser));
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.encode64(emailUsuario);
+        usuarioRef = firebaseRef.child("usuarios")
+                .child(idUsuario);
 
-        vELUsuario = usuarioRef.addValueEventListener(new ValueEventListener() {
+        valueEventListenerUsuario = usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Usuario usuario = dataSnapshot.getValue(Usuario.class);
+
                 despesaTotal = usuario.getDespesaTotal();
                 receitaTotal = usuario.getReceitaTotal();
-                resumo = receitaTotal - despesaTotal;
+                resumoUsuario = receitaTotal - despesaTotal;
 
-                DecimalFormat dc = new DecimalFormat("0.##");
+                DecimalFormat decimalFormat = new DecimalFormat("0.##");
+                String resultadoFormatado = decimalFormat.format(resumoUsuario);
 
-                txtSaldacao.setText("Olá, " + usuario.getNome());
-                txtSaldo.setText("R$: " + dc.format(resumo));
+                textoSaudacao.setText("Olá, " + usuario.getNome());
+                textoSaldo.setText("R$: " + resultadoFormatado);
             }
 
             @Override
@@ -117,7 +143,7 @@ public class PrincipalActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.menuSair:
-                auth.signOut();
+                autenticacao.signOut();
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
                 break;
@@ -134,23 +160,39 @@ public class PrincipalActivity extends AppCompatActivity {
         startActivity(new Intent(this, DespesasActivity.class));
     }
 
-    private void configCalendarView() {
+    private void configuraCalendarView() {
 
         CharSequence meses[] = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
         calendarView.setTitleMonths(meses);
-      /*  CharSequence dias[] = {"Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sabado"};
-        calendarView.setWeekDayLabels(dias);*/
+
+        CalendarDay dataAtual = calendarView.getCurrentDate();
+        String mesSelecionado = String.format("%02d", (dataAtual.getMonth() + 1));
+        mesAnoSelecionado = String.valueOf(mesSelecionado + "" + dataAtual.getYear());
+
         calendarView.setOnMonthChangedListener(new OnMonthChangedListener() {
             @Override
             public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
-                Log.i("calendario:", "valor:" + (date.getMonth() + 1) + "/" + date.getYear());
+                String mesSelecionado = String.format("%02d", (date.getMonth() + 1));
+                mesAnoSelecionado = String.valueOf(mesSelecionado + "" + date.getYear());
+
+                movimentacaoRef.removeEventListener(valueEventListenerMovimentacoes);
+                recuperarMovimentacoes();
             }
         });
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        recuperarResumo();
+        recuperarMovimentacoes();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
-        usuarioRef.removeEventListener(vELUsuario);///////
+        usuarioRef.removeEventListener(valueEventListenerUsuario);
+        movimentacaoRef.removeEventListener(valueEventListenerMovimentacoes);
     }
+
 }
