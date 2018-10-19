@@ -9,7 +9,7 @@ import br.com.jhonicosta.organizze.helper.DateCustom;
 
 public class Movimentacao {
 
-    private String data, categoria, descricao, tipo;
+    private String data, categoria, descricao, tipo, chave;
     private double valor;
 
     public Movimentacao() {
@@ -61,6 +61,14 @@ public class Movimentacao {
 
     public void setValor(double valor) {
         this.valor = valor;
+    }
+
+    public String getChave() {
+        return chave;
+    }
+
+    public void setChave(String chave) {
+        this.chave = chave;
     }
 
     public void salvar(String data) {
