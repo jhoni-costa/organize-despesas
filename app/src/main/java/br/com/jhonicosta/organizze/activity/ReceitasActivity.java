@@ -55,7 +55,7 @@ public class ReceitasActivity extends AppCompatActivity {
             movimentacao = new Movimentacao();
             movimentacao.setValor(valorRecuperado);
             movimentacao.setCategoria(campoCategoria.getText().toString());
-            movimentacao.setDescricao(campoData.getText().toString());
+            movimentacao.setDescricao(campoDescricao.getText().toString());
             movimentacao.setData(campoData.getText().toString());
             movimentacao.setTipo("r");
 
